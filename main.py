@@ -3,14 +3,14 @@ U=os.environ['MAKEFUN_ENV_URL']
 def post(p,b):
  with u.urlopen(U+p,j.dumps(b).encode())as r:return j.load(r)
 V=[0,100,320,330,500,900,0]
-P=['',b'KKKKUUUUMMOQLLMPKKKOLJIKLMMGKKKK',b'ACEECGKKEKMNELNOEKNOELMNCGKLACEE']
-J=[-33,-31,-18,-14,14,18,31,33];D=[-17,-15,15,17];R=[-16,-1,1,16];JG=J+D+R;O=(0,0,J,D,R,D+R,D+R)
-M=9999;BD=60000;B=[0]*128;T=1;C=0;E=-1;WK=4;BK=116;N=0;S=[]
+P=['',b'KKKKLMMGLJIKKKKOLLMPMMOQUUUUKKKK',b'ACEECGKLELMNEKNOELNOEKMNCGKKACEE',0,0,0,b'OQMKOOKKIGGGGEECECCAECCAECCAECCA']
+J=[-33,-31,-18,-14,14,18,31,33];D=[-17,-15,15,17];R=[-16,-1,1,16];O=(0,0,J,D,R,D+R,D+R)
+M=9999;BD=75000;N=0;S=[];KL=[0]*64
 A=Exception
 def e(x):return B[x]and(B[x]<7)^(T>0)
 def att(s,b):
  q=7-6*(b>0)
- for d in JG:
+ for d in J+D+R:
   x=s+d;p=B[x]if not x&136 else 0
   if p==q+1 and d in J or p==q+5 or p==q and d*b in(-15,-17):return 1
  for d in D+R:
@@ -28,14 +28,14 @@ def gen(z):
  m=[]
  for f,p in enumerate(B):
   if not p or(p<7)^(T>0):continue
-  t=p-6*(p>6)
+  t=p%6 or 6
   if t==1:
    d=16*T;x=f+d;r=7*(T>0)
    if not x&136 and not B[x]:
-    if x>>4==r:m+=[f|(x<<7)|(q<<14)for q in(5,4,3,2)]
+    if x>>4==r:m.append(f|(x<<7)|(5<<14))
     elif not z:m.append(f|(x<<7));(f>>4)==1+5*(T<0)and not B[f+2*d]and m.append(f|((f+2*d)<<7))
    for x in(f+d-1,f+d+1):
-    if not x&136 and(x==E or e(x)):m+=[f|(x<<7)|(q<<14)for q in(5,4,3,2)]if x>>4==r else[f|(x<<7)]
+    if not x&136 and(x==E or e(x)):m+=[f|(x<<7)|(5<<14)]if x>>4==r else[f|(x<<7)]
   else:
    for d in O[t]:
     x=f+d
@@ -55,7 +55,7 @@ def mk(m):
  f=m&127;t=m>>7&127;q=m>>14&7;p=B[f]
  if p%6==1 and t==E and not B[t]:B[t-16*T]=0
  B[t]=q+6*(T<0)if q else p;B[f]=0
- if p in(6,12)and abs(t-f)==2:u=t+1 if t>f else t-2;v=u-2 if t>f else u+3;B[v]=B[u];B[u]=0
+ if p%6==0 and abs(t-f)==2:u=t+1 if t>f else t-2;v=u-2 if t>f else u+3;B[v]=B[u];B[u]=0
  if p==6:WK=t;C&=~3
  elif p==12:BK=t;C&=~12
  for s,b in((0,2),(7,1),(112,8),(119,4)):
@@ -65,18 +65,19 @@ def un():
  global T,C,E,WK,BK
  B[:],C,E,WK,BK,T=S.pop()
 def ev():
- s=0
+ s=wb=bb=0
  for i,p in enumerate(B):
   if p:
    w=p<7;t=p-6+6*w;q=i if w else i^112;r=q>>4;f=q&7;f=min(f,7-f);j=r*4+f
-   s+=((V[t]+(P[t][j]-75)*5)if t<3 else V[t])*(w*2-1)
- return s*T
-def od(ms):
+   if t==3:wb+=w;bb+=1-w
+   s+=(V[t]+((P[t][j]if t in(1,2,6)else 75)-75)*5)*(w*2-1)
+ return(s+50*((wb>1)-(bb>1)))*T
+def od(ms,pl):
  def k(m):
   f=m&127;t=m>>7&127;p=B[f];x=B[t]
-  if x or(t==E and p%6==1):return 10000+10*V[1 if not x else x-6*(x>6)]-V[p-6*(p>6)]
-  return 0
- ms.sort(key=k,reverse=True)
+  if x:return 1e4+10*V[x%6 or 6]-V[p%6 or 6]
+  return(m==KL[pl])*9000
+ ms.sort(key=k,reverse=1)
 def qs(a,b,pl):
  global N;N+=1
  if N>BD:raise A
@@ -85,7 +86,7 @@ def qs(a,b,pl):
  if not ic:
   if s>=b:return b
   if s>a:a=s
- ms=gen(0)if ic else gen(1);od(ms);n=0
+ ms=gen(0)if ic else gen(1);od(ms,pl);n=0
  for m in ms:
   if not lg(m):continue
   n+=1;v=-qs(-b,-a,pl+1);un()
@@ -96,17 +97,17 @@ def qs(a,b,pl):
 def sr(d,a,b,pl):
  global N;N+=1
  if N>BD:raise A
- if d<=0:return qs(a,b,pl)
- ms=gen(0);od(ms);bs=-M;n=0
+ if d<1:return qs(a,b,pl)
+ ms=gen(0);od(ms,pl);n=0
  for m in ms:
   if not lg(m):continue
-  n+=1;v=-sr(d-1,-b,-a,pl+1);un();bs=max(bs,v);a=max(a,v)
-  if a>=b:break
+  n+=1;v=-sr(d-1,-b,-a,pl+1);un();a=max(a,v)
+  if a>=b:KL[pl]=m;break
  if not n:return-M+pl if att(WK if T>0 else BK,-T)else 0
- return bs
+ return a
 def uci(m):
  f=m&127;t=m>>7&127;q=m>>14&7
- return chr(97+f%8)+str(f//16+1)+chr(97+t%8)+str(t//16+1)+(q and'nbrq'[q-2]or'')
+ return chr(97+f%8)+str(f//16+1)+chr(97+t%8)+str(t//16+1)+(q and'q'or'')
 def parse(fen):
  global B,T,C,E,WK,BK
  w=fen.split();B=[0]*128;s=112
@@ -124,16 +125,17 @@ def parse(fen):
 def choose(legal):
  global N
  ms=[m for m in gen(0)if uci(m)in legal]
- N=0;bm=ms[0];sc={}
+ N=0;bm=ms[0];cb=bm;sc={}
  try:
-  for d in range(1,8):
-   a=-M;ms.sort(key=lambda x:sc.get(x,0),reverse=True)
+  for d in range(7):
+   a=-M;ms.sort(key=lambda x:sc.get(x,0),reverse=1)
    for m in ms:
     if not lg(m):continue
-    v=-sr(d-1,-M,-a,1);un();sc[m]=v
+    v=-sr(d,-M,-a,1);un();sc[m]=v
     if v>a:a=v;bm=m
+   cb=bm
  except A:pass
- return uci(bm)
+ return uci(cb)
 while 1:
  g=post('/game',{})
  if g['status'][0]=='d':break
